@@ -16,7 +16,7 @@ slidenumbers: true
 2. 🆕 New in Swift 4.2
 3. 💻 Contributing!
     * Starter Bugs 
-    * Evolution Proposals
+    * Evolution Ideas
 
 ---
 
@@ -31,7 +31,7 @@ slidenumbers: true
 
 ---
 
-# Example
+# Example[^curl]
 
 ```bash
 ~ $ mkdir ./curl
@@ -370,6 +370,10 @@ Resolving https://github.com/apple/swift-nio-zlib-support.git at 1.0.0
 
 ---
 
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/Dependencies.png)
+
+---
+
 * At this point, work with either Xcode or your favorite text editor.
 * All of these commands will work on either Linux or Darwin.
 
@@ -540,7 +544,6 @@ Slack is up! 🎉
 * The Package manifest now accepts a new type of target, *systemLibrary*.
 * This deprecates "system-module packages" which are now to be included in the packages that require system-installed dependencies.
 
-
 ---
 
 # SwiftVersion Enum
@@ -550,6 +553,13 @@ Slack is up! 🎉
 * The *swiftLanguageVersions* property no longer takes its Swift language versions via a freeform Integer array.
 * Instead it should be passed as a new *SwiftVersion* enum array.
 
+---
+
+# Lots of Upgrades
+
+* Many bugfixes
+* Documentation improvements
+* Better diagnostic messages
 
 ---
 
@@ -557,6 +567,164 @@ Slack is up! 🎉
 
 ---
 
+# Starter Bugs 🐛
+
+* Please feel empowered to pick up any of these!
+* Ask questions on the thread or the Swift PM Slack workspace
+* Post a PR and for more comments and iteration, then ship!
+
+---
+
+# Starter Bugs 🐛
+
+*SR-7825*
+
+* SwiftPM should consider a target with header files but no sources as a `ClangTarget`.
+
+* https://bugs.swift.org/browse/SR-7825
+
+---
+
+# Starter Bugs 🐛
+
+*SR-7979*
+
+* Circular Dependency in SwiftPM Causes Segfault
+
+* Package *Foo* depends on *Bar*, yet *Bar* depends on *Foo*
+
+* https://bugs.swift.org/browse/SR-7979
+
+---
+
+# Starter Bugs 🐛
+
+*SR-8204*
+
+* Sort targets in SwiftPM generated Xcode project
+
+* *@hartbit* has a suggestion in-thread
+
+* https://bugs.swift.org/browse/SR-8204
+
+---
+
+# Starter Bugs 🐛
+
+*SR-8645* and *SR-8646*
+
+* Very new!
+
+* BuildPlan Error description improvements
+
+* https://bugs.swift.org/browse/SR-8645
+* https://bugs.swift.org/browse/SR-8645
+
+---
+
+# Evolution Ideas 📜
+
+Thank you Ankit![^8]
+
+---
+
+# Evolution Ideas 📜
+
+*SR-3948*
+
+* Define specific "build settings" or "language/linker flags" in the Package manifest.
+
+* https://bugs.swift.org/browse/SR-3948
+
+---
+
+# Evolution Ideas 📜
+
+*SR-883*
+
+* Conditional Dependencies
+
+* Allow packages to download dependencies only when testing, or only on certain platforms.
+
+* Remove the current "conditional" option in favor of a declarative model.
+
+* https://bugs.swift.org/browse/SR-883
+
+---
+
+# Evolution Ideas 📜
+
+*SR-2866*
+
+* Resource Support
+
+* Packages need to be able to include other files with themselves.
+
+* https://bugs.swift.org/browse/SR-2866
+
+---
+
+# Evolution Ideas 📜
+
+*SR-7837*
+
+* Custom `swift package init` template support
+
+* https://bugs.swift.org/browse/SR-7837
+
+---
+
+# Evolution Ideas 📜
+
+* Documentation Generation Support
+
+* Use SourceKit to extract docstrings and pull out documentation for the package.
+
+---
+
+# Evolution Ideas 📜
+
+* Tagging and Publishing support
+
+* Add guardrails and better workflow for cutting and releasing new Package versions
+
+---
+
+# Evolution Ideas 📜
+
+*SR-3951*
+
+* Multi-Package Repository Support
+
+* Good for folks who live in a monorepo, or want to keep packages in-sync across revisions.
+
+* https://bugs.swift.org/browse/SR-3951
+
+---
+
+# Evolution Ideas 📜
+
+* Cross-platform Sandboxing
+
+* Machine-Editable `Package.swift`
+
+* Automatic Semantic Versioning
+
+
+---
+
+# Thank you![^9]
+
+* Joe Smith, *@Yasumoto*
+* https://*slack.com/jobs*
+
+* SwiftPM Slack
+    * https://swift-package-manager.herokuapp.com
+* Vapor Discord
+    * https://discordapp.com/invite/vapor
+
+
+[^curl]: https://github.com/Yasumoto/curl
 
 [^1]: https://github.com/apple/swift-package-manager/pull/1489
 
@@ -571,3 +739,7 @@ Slack is up! 🎉
 [^6]: https://github.com/apple/swift-evolution/blob/master/proposals/0208-package-manager-system-library-targets.md
 
 [^7]: https://github.com/apple/swift-evolution/blob/master/proposals/0209-package-manager-swift-lang-version-update.md
+
+[^8]: https://github.com/apple/swift-package-manager/blob/master/Documentation/EvolutionIdeas.md
+
+[^9]: https://github.com/Yasumoto/talks/tree/master/2018/08/28
