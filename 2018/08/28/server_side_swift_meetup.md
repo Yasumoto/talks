@@ -563,6 +563,10 @@ Slack is up! 🎉
 
 ---
 
+# Swift 4.2 Demo 🤞
+
+---
+
 # 💻 Contributing!
 
 ---
@@ -572,6 +576,7 @@ Slack is up! 🎉
 * Please feel empowered to pick up any of these!
 * Ask questions on the thread or the Swift PM Slack workspace
 * Post a PR and for more comments and iteration, then ship!
+* *StarterBug* label on `bugs.swift.org`
 
 ---
 
