@@ -6,6 +6,23 @@ slidenumbers: true
 
 ### 🐦 @Yasumoto
 
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/slack.gif)
+
+---
+
+* Engineers should have *excellent tools*.
+
+* Work is mobile, but DevOps/SRE tools *aren't* yet.
+
+* Swift libraries straddle both Server and Mobile.
+
+* Pure-Swift libraries to work with infrastructure:
+    * 🔐 [SSL Certificates](https://github.com/Yasumoto/DigicertSwift)
+    * 📈 [Metrics retrieval](https://github.com/Yasumoto/Enpitsu)
+    * 📟 [PagerDuty queries](https://github.com/Yasumoto/PagerDutySwift)
+    * 👩‍🍳 [Chef](https://github.com/Yasumoto/Gyutou)
+    * ☁️ [AWS](https://github.com/swift-aws/aws-sdk-swift) (thanks *@noppoMan* and *@jonnymacs*!)
+
 ---
 
 # Agenda
@@ -20,7 +37,9 @@ slidenumbers: true
 
 ---
 
-### 📦 Creating a Package
+# 📦 Creating a Package
+
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/box.gif)
 
 ---
 
@@ -28,6 +47,9 @@ slidenumbers: true
 
 * The Swift Package Manager makes it simple to organize your code into reusable modules
 * You can point to git repositories of Swift code to pull that into your project
+* Automatically installed with the rest of Swift.
+    * macOS via Xcode
+    * Ubuntu Linux via [swift.org](https://swift.org/download/#releases)
 
 ---
 
@@ -118,6 +140,8 @@ Hello world!
 ---
 
 # 🧠 Concepts
+
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/concepts.gif)
 
 ---
 
@@ -497,6 +521,8 @@ Slack is up! 🎉
 
 # 🆕 New in Swift 4.2
 
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/new.gif)
+
 ---
 
 # "Limited Terminal" Support [^1]
@@ -565,9 +591,13 @@ Slack is up! 🎉
 
 # Swift 4.2 Demo 🤞
 
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/Do-Or-Do-Not.gif)
+
 ---
 
 # 💻 Contributing!
+
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/fork.gif)
 
 ---
 
@@ -630,6 +660,8 @@ Slack is up! 🎉
 # Evolution Ideas 📜
 
 Thank you Ankit![^8]
+
+![inline](file:///Users/jmsmith/workspace/Baseline/Yasumoto/talks/2018/08/28/evolution.gif)
 
 ---
 
