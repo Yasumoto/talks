@@ -95,7 +95,7 @@ build-lists: true
 
 [.footer: Photo by Ryan Stone on Unsplash]
 
-^ Start with small, well-scoped tools. For me, that meant finding command-line tools used for things like SSL Certificate management.
+^ Start with small, well-scoped tools. For me, that meant building command-line tools used for things like SSL Certificate management.
 
 ^ I also used to work directly on top of AWS, so it was important to have a reliable AWS client.
 
@@ -272,6 +272,8 @@ build-lists: true
 
 [.build-lists: false]
 
+^ These are individual values
+
 ---- 
 ### Collection Values
 
@@ -282,6 +284,8 @@ build-lists: true
 5. `String Set`
 
 [.build-lists: false]
+
+^ And these are ways to group attributes. Note that `List` and `Map` take any type of Attribute.
 
 ---- 
 
@@ -436,7 +440,7 @@ resource "aws_dynamodb_table" "emergency_stop_service_lock" {
 
 [.footer: Photo by Paweł Czerwiński on Unsplash]
 
-^ We're going to walk through some of the functionality this provides, learning heavily from other language implementations.
+^ We're going to walk through some of the functionality this provides, inspired by other language implementations.
 
 ----
 ## `CredentialProvider`
@@ -508,7 +512,7 @@ public final class HTTPClient {
 
 ^ We have our own low-level HTTP client.
 
-^ We've considered migrating to the `AsyncHTTPClient`, but so far we've appreciated having the fine-grained control of this client we've been using for about a year or so.
+^ We've considered migrating to the `AsyncHTTPClient`, but it does not yet support `NIOTransportServices` which would limit the platforms we can support.
 
 ---- 
 
@@ -550,7 +554,7 @@ public func send<Output: AWSShape, Input: AWSShape>(
         }
 }
 
-^ When we want to make an API request, the first thing we're going to do is ensure we have credentials.
+^ When we want to make an API request, we first asynchronously check that credentials are set or refreshed if necessary.
 
 ^ After that succeeds, we will use our input values to construct and sign the request with our credentials.
 
@@ -576,9 +580,10 @@ public func send<Output: AWSShape, Input: AWSShape>(
         }
 }
 
-^ When that processing completes, we convert that into a HTTP request which will get sent over the wire thanks to NIO.
 
-^ As soon as we get a response back from AWS, we'll decode the message (using the right decoder depending on the service!) and send that back to the user, wrapped in a Future.
+^ The AWSClient knows how to encode and decode `awsRequest` / response headers and bodies based on the serviceProtocol.
+
+^ We use NIO to send the request to aws, and return a future response object to the client.
 
 ---- 
 
@@ -602,6 +607,8 @@ public func send<Output: AWSShape, Input: AWSShape>(
         }
 }
 
+^ When the response is received, it is decoded, validated then mapped to the appropriate response type and the future is completed.
+
 ^ If it is not successful then `AWSClient` will throw an `AWSErrorType`.
 
 ---- 
@@ -611,6 +618,8 @@ public func send<Output: AWSShape, Input: AWSShape>(
 1. `AttributeValue`
 2. `getItem` / `putItem`
 3. `query`
+
+^ Now we'll dive into the code-generated DynamoDB client itself.
 
 ---- 
 
@@ -634,6 +643,8 @@ public let null: Bool?
 
 /// An attribute of type String. For example:  "S": "Hello"
 public let s: String?
+
+^ Here are the ways to represent the different `AttributeValue` types with this library.
 
 ^ Calling out that Number is _not_ `Numeric`, but instead passed to Dynamo as a `String` !
 
@@ -659,6 +670,31 @@ public let ns: [String]?
 /// "SS": ["Giraffe", "Hippo" ,"Zebra"]
 public let ss: [String]?
 
+----
+
+public class AttributeValue: AWSShape {
+    public init(b: Data? = nil, bool: Bool? = nil,
+			    bs: [Data]? = nil, l: [AttributeValue]? = nil,
+				m: [String: AttributeValue]? = nil,
+				n: String? = nil, ns: [String]? = nil,
+				null: Bool? = nil, s: String? = nil,
+				ss: [String]? = nil) {
+        self.b = b
+        self.bool = bool
+        self.bs = bs
+        self.l = l
+        self.m = m
+        self.n = n
+        self.ns = ns
+        self.null = null
+        self.s = s
+        self.ss = ss
+    }         
+
+^ This is a class which has a pretty big initializer, and trying to figure out what's set can be a challenge.
+
+^ In `FluentDynamoDB`, we've created a `DynamoValue` which makes this much nicer.
+
 ---- 
 
 ## Fetching a Single Item
@@ -673,7 +709,7 @@ public func getItem(_ input: GetItemInput) -> Future<GetItemOutput> {
                        input: input)
 }
 
-^ This is very much like your traditional key-value store; the `input` contains a `key` to correspond with the primary key you want to retrieve.
+^ Calling `getItem` is very much like using a traditional key-value store; the `input` contains a `key` to correspond with the primary key you want to retrieve.
 
 ^  If there is no matching item, GetItem does not return any data and there will be no Item element in the response.  
 
@@ -806,7 +842,7 @@ let expressionAttributeValues = [
 
 let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
-^ To walk us through an example, let's say we had a Seondary Index setup on `Timestamp`
+^ To walk us through an example, let's say we had a Secondary Index setup on `Timestamp`
 
 ^ We want to query for all the updates made within the last 60 minutes
 
@@ -894,7 +930,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 ---- 
 
-## Denormalized Data
+## 🔀 Denormalized Data
 
 ^ So the lesson I learned here was to focus on how to utilize the structures available to create an appropriate access pattern.
 
@@ -907,17 +943,25 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 # Fluent DynamoDB
 
+![photo-1496355723323-30286a0b340d]
+
+^ We're moving up to the third and final part of the talk!
+
+^ It's already been quite a journey.
+
+[.footer: Photo by Will O on Unsplash]
+
 ---- 
 
-## Fluent 3 Concepts
+## 💧 Fluent 3 Concepts
 
-1. `Database`
-2. `DatabaseConnection`
-3. `Provider`
+1. 📦 `Database`
+2. 🔌 `DatabaseConnection`
+3. 😻 `Provider`
 
 ---- 
 
-### 📦  Database
+### 📦  `Database`
 
 public protocol Database {
 
@@ -958,15 +1002,19 @@ public final class DynamoDatabase: Database {
         }
     }
 
+^ This is our opportunity to convert credentials & region (our configuration) into a connection.
+
+^ Our connection will ask us for a client when it's ready to spin one up.
+
 ----
 
-##  DatabaseConnection
+##  🔌 `DatabaseConnection`
 
 ![photo-1534224039826-c7a0eda0e6b3]
 
 [.footer: Photo by israel palacio on Unsplash]
 
-^ The DatabaseConnection is what I'd consider the core to actually work with your underlying db.
+^ The `DatabaseConnection` is what I'd consider the core to actually work with your underlying db.
 
 ^ This takes the AWS client library and makes the proper calls based on the query.
 
@@ -986,6 +1034,8 @@ public protocol DatabaseConnection: DatabaseConnectable, Extendable {
     /// Closes the `DatabaseConnection`.
     func close()
 }
+
+^ The `Connection` itself is quite simple.
 
 ---- 
 
@@ -1019,6 +1069,8 @@ public final class DynamoConnection: DatabaseConnection {
 ## Creating a Connection
 
 ![photo-1571990775458-0fd6051bc201]
+
+^ Let's talk about a few things we also need to create so we can actually use our `Connection` to make queries.
 
 [.footer: Photo by Phix Nguyen on Unsplash]
 
@@ -1071,6 +1123,8 @@ public protocol DatabaseConnectable: Worker {
 
 }
 
+^ You'll receive a connection by asking something that conforms to `DatabaseConnectable`.
+
 ^ This is typically going to be the `Request` object that you get once you receive a request.
 
 ----
@@ -1078,6 +1132,8 @@ public protocol DatabaseConnectable: Worker {
 ## `DatabaseQueryable`
 
 ![photo-1557604582-d287ede3d371]
+
+^ We're also going to conform our `DynamoConnection` to `DatabaseQueryable` so it can submit requests.
 
 [.footer: Photo by Kirill Pershin on Unsplash]
 
@@ -1095,6 +1151,10 @@ public protocol DatabaseQueryable {
 			   _ handler: @escaping (Output) throws -> ()) ->
 			Future<Void>
 }
+
+^ We need input, a`Query` and a response, or `Output`.
+
+^ Then we just need to make sure we implement the actual query logic.
 
 ---- 
 
@@ -1114,23 +1174,36 @@ public struct DynamoQuery {
     public let keys: [DynamoValue]
 }
 
-^ For FluentDynamoDB it is the wrapper that allows us to `query`. 
+^ For FluentDynamoDB, `DynamoQuery` is the wrapper that allows us to `query`. 
+^ It knows what table to send the request to, whether it's reading or writing, and what item to operate on.
+
 ----
 
-/// 📖 Submit request to DynamoDB for one value
-///
-/// The Future signals completion, and the handler will run upon success.
-/// Note for .set and .delete queries, the handler will be called with the *old* values
-/// that have been replaced!
+/// 🔑 Values to uniquely identify an item stored in a DynamoDB Table
+public struct DynamoValue: Codable, Equatable {
+
+    public enum Attribute: Codable, Equatable {
+        case mapping([String: Attribute])
+        case null(Bool)
+        case stringSet([String])
+        case binary(Data)
+        case string(String)
+        case list([Attribute])
+        case bool(Bool)
+        case numberSet([String])
+        case binarySet([Data])
+        /// We send over all numbers to Dynamo as Strings, and cannot use Numeric
+        case number(String)
+}
+
+^ When we return a value, we wrap it inside an Enum with associated values. This feels much more natural to work with.
+
+^ We have helpers to convert to/from the underlying `AttributeValue` used by the DynamoDB library.
+
+----
+
+
 public func query(_ query: Query, _ handler: @escaping (Output) throws -> ()) -> Future<Void> {
-    self.logger?.record(query: String(describing: query))
-    do {
-        if query.keys.count != 1 {
-            throw DynamoConnectionError.improperlyFormattedQuery("`DynamoQuery.keys` should only set one key when requesting a single value.")
-        }
-        guard let requestedKey = query.keys.first?.encodedKey else {
-            throw DynamoConnectionError.improperlyFormattedQuery("`DynamoQuery.keys` should only set one `DynamoValue` when requesting a single value.")
-        }
         switch query.action {
         case .get:
             let inputItem = DynamoDB.GetItemInput(
@@ -1157,6 +1230,12 @@ public func query(_ query: Query, _ handler: @escaping (Output) throws -> ()) ->
     }
 }
 
+^ So let's look at how to make a request. I'll zoom in to `PutItem` on the next slide.
+
+^ For this query, we're submitting a request to DynamoDB for one value
+
+^ We return a Future which signals completion, and the handler will run upon success.
+
 ----
 
 case .set:
@@ -1167,6 +1246,12 @@ case .set:
      return self.handle.putItem(inputItem).map { output in
      	return try handler(DynamoValue(attributes: output.attributes))
 	 }
+
+^ To look at this more closely, we're generating the `PutItemInput` and sending the request.
+
+^ Once we receive the response, we'll convert back to `DynamoValue` and invoke the callback.
+
+^ Fluent provides a wrapper which wraps this in a `Future` assuming callers prefer that route.
 
 ----
 
@@ -1237,9 +1322,15 @@ let dynamo = DynamoDatabase(config: dynamoConfiguration)
 databases.add(database: dynamo, as: .dynamo)
 services.register(databases)
 
+^ We're almost there!
+
+^ Now it's time to wire everything up in our `configure` function.
+
 ----
 
 # 🥁
+
+^ And then, you can create a `Model` (which is usually application-specific)...
 
 ----
 
@@ -1261,6 +1352,10 @@ public func write(on worker: Request) -> EventLoopFuture<[DynamoValue]> {
     	}
 }
 
+^ Create a key from a struct's properties
+
+^ Convert that to your query, then submit the request!
+
 ----
 
 # 🎉 🎉 🎉
@@ -1274,12 +1369,12 @@ public func write(on worker: Request) -> EventLoopFuture<[DynamoValue]> {
 
 # Next
 
-1. Publish `AWSSDKSwift` 4.0.0
-	1. Uses `NIO` 2.0 🎉
-2. Convert `FluentDynamoDB` to NIO 2 & Fluent 4
-3. Upgrade `DynamoModel`
-4. Create `Migration` support (mostly for testing)
-5. Better integration with `swift-log` and `swift-metrics`
+1. ⏫ Publish `AWSSDKSwift` 4.0.0
+	1. 🎉 Uses `NIO` 2.0
+2. 🌄 Create `DynamoKit` with NIO 2.0
+3. 💧 Convert `FluentDynamoDB` to Fluent 4
+4. 🕺 Upgrade `DynamoModel`
+5. ✨ Better integration with `swift-log` and `swift-metrics`
 
 ----
 
