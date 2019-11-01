@@ -1152,7 +1152,7 @@ public protocol DatabaseQueryable {
 			Future<Void>
 }
 
-^ We need input, a`Query` and a response, or `Output`.
+^ We need input, a `Query` and a response, or `Output`.
 
 ^ Then we just need to make sure we implement the actual query logic.
 
@@ -1322,15 +1322,23 @@ let dynamo = DynamoDatabase(config: dynamoConfiguration)
 databases.add(database: dynamo, as: .dynamo)
 services.register(databases)
 
-^ We're almost there!
+^ We're almost there! Let's get up to Application Code!
 
-^ Now it's time to wire everything up in our `configure` function.
+& We wire everything up in our `configure` function.
 
 ----
 
-# 🥁
+struct ServiceLock: Codable {
+    public let serviceName: String
+    public var version: Int?
+    public var currentVersion: Int?
+    public let isIncidentOngoing: Bool
+    public let username: String
+    public let timestamp: Date
+    public let message: String
+}
 
-^ And then, you can create a `Model` (which is usually application-specific)...
+extension ServiceLock: Content { }
 
 ----
 
@@ -1354,7 +1362,30 @@ public func write(on worker: Request) -> EventLoopFuture<[DynamoValue]> {
 
 ^ Create a key from a struct's properties
 
-^ Convert that to your query, then submit the request!
+^ Convert that to your query, then submit the request
+
+----
+
+# 🥁
+
+----
+
+router.post { req -> Future<View> in
+    return try req.content.decode(Update.self).flatMap { update in
+        return ServiceLock.read(on: req,
+							    serviceName: ServiceNames.global,
+								version: 0).flatMap { latestLock in
+            var lock = ServiceLock(serviceName: latestLock.serviceName,
+								   version: latestLock.currentVersion! + 1,
+								   currentVersion: nil,
+								   isIncidentOngoing: update.isIncidentOngoing,
+								   username: username,
+								   timestamp: Date(),
+								   message: update.message)
+            return lock.write(on: req)
+		}
+	}
+}
 
 ----
 
