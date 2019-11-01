@@ -12,7 +12,7 @@ build-lists: true
 
 ![50%]
 
----- 
+----
 
 [.build-lists: false]
 
@@ -35,7 +35,7 @@ build-lists: true
 
 ^ Would *love* to be able to use my phone for more incident response!
 
----- 
+----
 
 ## Agenda
 
@@ -50,9 +50,9 @@ build-lists: true
 
 ^ Then we'll start at the bottom of an application's stack, it's datastore.
 
-^ We'll slowly move up the stack, talking about an Amazon Web Services client library, then integrate it with Fluent.
+^ We'll slowly move up the stack, talking about an Amazon Web Services client library, and I'm excited to provide this introduction to the community!  ^ Then we'll integrate it with Fluent, and review the critical components Fluent uses behind the scenes to provide access to different datastores.
 
----- 
+----
 
 # Launching to Prod
 
@@ -66,13 +66,13 @@ build-lists: true
 
 ^ Need to maintain investment, understanding, and consider what work needs to be done now to enable you in the future.
 
----- 
+----
 
 ## Ecosystem
 
 ![photo-1543133690-e427d2bdd1dd]
 
-^ Swift on the server is *very* new 
+^ Swift on the server is *very* new
 
 ^ I love the way the community is working together to build out the necessary frameworks for us to be successful.
 
@@ -80,7 +80,7 @@ build-lists: true
 
 [.footer: Photo by Markus Spiske on Unsplash]
 
----- 
+----
 
 ## Introducing New Technology
 
@@ -96,7 +96,7 @@ build-lists: true
 
 [.footer: Photo by Tyler Lastovich on Unsplash]
 
----- 
+----
 
 ## Roadmap
 
@@ -129,7 +129,7 @@ build-lists: true
 ^ We wanted to be able to answer two questions quickly, so we built `Emergency Stop`.
 
 
----- 
+----
 
 (img)
 
@@ -141,7 +141,7 @@ build-lists: true
 
 ^ These tools would also query Emergency Stop to look for whether it was safe to proceed.
 
----- 
+----
 
 ### Data Structure — `ServiceLock`
 
@@ -171,7 +171,7 @@ build-lists: true
 
 [.footer: Photo by Benjamin Davies on Unsplash]
 
----- 
+----
 
 ## Low-risk Production Experience
 
@@ -183,7 +183,7 @@ build-lists: true
 
 ^ Sometimes it works, but as your friendly neighborhood SRE, I **strongly** urge against it!
 
----- 
+----
 
 ## 🤔 Picking a Datastore (at Slack)
 
@@ -211,20 +211,20 @@ build-lists: true
 
 ^ Denormalized Data
 
----- 
+----
 
-> Most of our services... store and retrieve data by primary key and do not require the **complex querying** and management functionality offered by an RDBMS. 
+> Most of our services... store and retrieve data by primary key and do not require the **complex querying** and management functionality offered by an RDBMS.
 
 -- Dynamo Paper
 
 
-^ Reading the Dynamo paper gives some insights into its usage. 
+^ Reading the Dynamo paper gives some insights into its usage.
 
 ^ The infrastructure engineers realized that for their usecase, most teams were *not* taking advantage of the features offered by a SQL datastore.
 
 ^ If folks could give up some flexibility and take on some constraints, that opened up some interesting options!
 
----- 
+----
 
 ## Key Concepts
 
@@ -236,7 +236,7 @@ build-lists: true
 
 ^ These are the "nouns" of DynamoDB.
 
----- 
+----
 
 ### Table
 
@@ -279,7 +279,7 @@ build-lists: true
 
 ^ You can specify a single value or several
 
----- 
+----
 
 ### Scalar Values
 
@@ -293,7 +293,7 @@ build-lists: true
 
 ^ These are individual values
 
----- 
+----
 ### Collection Values
 
 1. `Binary Set`
@@ -306,7 +306,7 @@ build-lists: true
 
 ^ And these are ways to group attributes. Note that `List` and `Map` take any type of Attribute.
 
----- 
+----
 
 ### Primary Key
 
@@ -322,7 +322,7 @@ build-lists: true
 
 ^ A composite primary key made up of a partition key and a sort key. Enables complex queries.
 
----- 
+----
 
 ## Scalars as Primary Keys
 
@@ -334,7 +334,7 @@ build-lists: true
 
 ^ These can all be used as primary keys
 
----- 
+----
 
 
 ### Data Structure — `ServiceLock`
@@ -348,7 +348,7 @@ build-lists: true
 
 ^ Bringing this back to our "Red Button", these are the types we'll use for each field.
 
----- 
+----
 
 resource "aws_dynamodb_table" "emergency_stop_service_lock" {
   name           = "emergency-stop-service-lock"
@@ -415,7 +415,7 @@ resource "aws_dynamodb_table" "emergency_stop_service_lock" {
 ^ Note that you need to pick your Primary Key well, that's what Dynamo uses to determine which nodes host your data.
  ^ Choosing poorly means you'll have "hot shards" that are overloaded by too many requests!
 
----- 
+----
 
 ## [https://dynamodbguide.com]
 
@@ -438,7 +438,7 @@ resource "aws_dynamodb_table" "emergency_stop_service_lock" {
 
 [.footer: Photo by Levi Morsy on Unsplash]
 
----- 
+----
 
 ## Two Components
 
@@ -453,7 +453,7 @@ resource "aws_dynamodb_table" "emergency_stop_service_lock" {
 
 ^ The second part is the "main" SDK, which contains a Code Generator and the actual APIs & request/response Shapes
 
----- 
+----
 
 ## AWS SDK Swift Core
 
@@ -482,7 +482,7 @@ public protocol CredentialProvider {
 INI File (`~/.aws`)
 Metadata Service (IAM or ECS Profile), which is the best practice.
 
----- 
+----
 
 ## AWS SDK Swift Core — Hashing
 
@@ -504,7 +504,7 @@ or
 
 ^ We need an `hmac` function for nearly each part of the request signature, as well as `sha256` for the body and `md5`for S3.
 
----- 
+----
 
 ## AWS SDK Swift Core — `HTTPCLient`
 
@@ -513,13 +513,13 @@ public final class HTTPClient {
         var head: HTTPRequestHead
         var body: Data = Data()
     }
-    
+
     public struct Response {
         let head: HTTPResponseHead
         let body: Data
         public func contentType() -> String?
     }
-    
+
     public enum HTTPError: Error {
         case malformedHead, malformedBody, malformedURL
     }
@@ -535,7 +535,7 @@ public final class HTTPClient {
 
 ^ We've considered migrating to the `AsyncHTTPClient`, but it does not yet support `NIOTransportServices` which would limit the platforms we can support.
 
----- 
+----
 
 public class AWSClient {
     public enum RequestError: Error {
@@ -551,9 +551,9 @@ public class AWSClient {
 						expires: Int = 86400) -> URL
 ...
 
-^ The HTTPClient is wrapped by an `AWSClient`, which is the workhorse of the SDK. 
+^ The HTTPClient is wrapped by an `AWSClient`, which is the workhorse of the SDK.
 
----- 
+----
 
 public func send<Output: AWSShape, Input: AWSShape>(
 	operation operationName: String,
@@ -606,7 +606,7 @@ public func send<Output: AWSShape, Input: AWSShape>(
 
 ^ We use NIO to send the request to aws, and return a future response object to the client.
 
----- 
+----
 
 public func send<Output: AWSShape, Input: AWSShape>(
 	operation operationName: String,
@@ -632,7 +632,7 @@ public func send<Output: AWSShape, Input: AWSShape>(
 
 ^ If it is not successful then `AWSClient` will throw an `AWSErrorType`.
 
----- 
+----
 
 ## AWS SDK Swift Dynamo Client
 
@@ -642,7 +642,7 @@ public func send<Output: AWSShape, Input: AWSShape>(
 
 ^ Now we'll dive into the code-generated DynamoDB client itself.
 
----- 
+----
 
 ### `AttributeValue`
 /// An attribute of type Binary. For example:
@@ -669,13 +669,13 @@ public let s: String?
 
 ^ Calling out that Number is _not_ `Numeric`, but instead passed to Dynamo as a `String` !
 
----- 
+----
 ### `AttributeValue`
 /// An attribute of type Binary Set. For example:
 /// "BS": ["U3Vubnk=", "UmFpbnk=", "U25vd3k="]
 public let bs: [Data]?
 
-/// An attribute of type List. For example: 
+/// An attribute of type List. For example:
 /// "L": [ {"S": "Cookies"} , {"S": "Coffee"}, {"N", "3.14159"}]
 public let l: [AttributeValue]?
 
@@ -710,13 +710,13 @@ public class AttributeValue: AWSShape {
         self.null = null
         self.s = s
         self.ss = ss
-    }         
+    }
 
 ^ This is a class which has a pretty big initializer, and trying to figure out what's set can be a challenge.
 
 ^ In `FluentDynamoDB`, we've created a `DynamoValue` which makes this much nicer.
 
----- 
+----
 
 ## Fetching a Single Item
 
@@ -732,9 +732,9 @@ public func getItem(_ input: GetItemInput) -> Future<GetItemOutput> {
 
 ^ Calling `getItem` is very much like using a traditional key-value store; the `input` contains a `key` to correspond with the primary key you want to retrieve.
 
-^  If there is no matching item, GetItem does not return any data and there will be no Item element in the response.  
+^  If there is no matching item, GetItem does not return any data and there will be no Item element in the response.
 
----- 
+----
 
 ### `GetItemInput`
 
@@ -752,10 +752,10 @@ public let tableName: String
 ^ GetItem provides an eventually consistent read by default, so you may get stale data.
 
 ^ If your application requires a strongly consistent read, set ConsistentRead to true.
-  
+
 ^ Although a strongly consistent read might take more time than an eventually consistent read, it always returns the last updated value.
 
----- 
+----
 
 ## Setting Items
 
@@ -767,7 +767,7 @@ public func putItem(_ input: PutItemInput) -> Future<PutItemOutput> {
 					   input: input)
 }
 
-^ If an item that has the same primary key as the new item already exists in the specified table, the new item completely replaces the existing item. 
+^ If an item that has the same primary key as the new item already exists in the specified table, the new item completely replaces the existing item.
 
 ^ You can perform a conditional put operation (add a new item if one with the specified primary key doesn't exist), or replace an existing item if it has certain attribute values.
 
@@ -787,7 +787,7 @@ public func putItem(_ input: PutItemInput) -> Future<PutItemOutput> {
 
 ^ Use them to prevent overwriting with the `attribute_not_exists` conditional expression
 
----- 
+----
 
 
 ### `PutItemInput`
@@ -809,7 +809,7 @@ public let tableName: String
 
 ^ You can return the item's attribute values in the same operation, using the ReturnValues parameter.
 
----- 
+----
 
 ## Querying for Multiple Items
 
@@ -822,13 +822,13 @@ public func query(_ input: QueryInput) -> Future<QueryOutput> {
 }
 
 
-^  You can query any table or secondary index that has a composite primary key (a partition key and a sort key).  
+^  You can query any table or secondary index that has a composite primary key (a partition key and a sort key).
 
-^ A Query operation always returns a result set. If no matching items are found, the result set will be empty. 
+^ A Query operation always returns a result set. If no matching items are found, the result set will be empty.
 
-^ Query results are always sorted by the sort key value. 
+^ Query results are always sorted by the sort key value.
 
-^ You can optionally narrow the scope of the Query operation by specifying a sort key value and a comparison operator in KeyConditionExpression. 
+^ You can optionally narrow the scope of the Query operation by specifying a sort key value and a comparison operator in KeyConditionExpression.
 
 ----
 
@@ -873,7 +873,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 ^ Finally, we put that together in a `Key Condition` which we use to describe our constraints.
 
----- 
+----
 
 ## AWS SDK Swift Dynamo Client
 
@@ -924,7 +924,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 ^ There's a setup for that with Dynamo, and Amazon has a pattern they suggest for this.
 
----- 
+----
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message | Current |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -937,7 +937,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 ^ The row with `Version = 0` is special, it's _always_ considered the latest version.
  ^ It's also the only item with a value for `Current`; that's a pointer to the latest row.
 
----- 
+----
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message | Current |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -949,7 +949,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 ^ We can also use a transaction to add row `3` at the same time.
 
----- 
+----
 
 ## 🔀 Denormalized Data
 
@@ -960,7 +960,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 ^ With Dynamo, whether you creating an additional Secondary Index or changing your data pattern, you're considering how your application will read your data ahead of time.
  ^ Once you set the data access patterns, they're largely locked in stone unless you add another Index (which has limits)
 
----- 
+----
 
 # Fluent DynamoDB
 
@@ -972,7 +972,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 [.footer: Photo by Will O on Unsplash]
 
----- 
+----
 
 ## 💧 Fluent 3 Concepts
 
@@ -982,7 +982,7 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 ![fit right]
 
----- 
+----
 
 ### 📦  `Database`
 
@@ -1047,7 +1047,7 @@ public protocol DatabaseConnection: DatabaseConnectable, Extendable {
     /// This connection's associated database type.
     associatedtype Database: DatabaseKit.Database
         where Database.Connection == Self
-    
+
     /// If `true`, this connection has been closed and is no
 	/// longer valid.
     /// This is used by `DatabaseConnectionPool` to prune
@@ -1060,7 +1060,7 @@ public protocol DatabaseConnection: DatabaseConnectable, Extendable {
 
 ^ The `DatabaseConnection` itself is quite simple.
 
----- 
+----
 
 public final class DynamoConnection: DatabaseConnection {
     public typealias Database = DynamoDatabase
@@ -1165,9 +1165,9 @@ public protocol DatabaseConnectable: Worker {
 public protocol DatabaseQueryable {
 
     associatedtype Query
-    
+
     associatedtype Output
-    
+
     /// Asynchronously executes a query passing zero
 	/// or more output to the supplied handler.
     func query(_ query: Query,
@@ -1179,7 +1179,7 @@ public protocol DatabaseQueryable {
 
 ^ Then we just need to make sure we implement the actual query logic.
 
----- 
+----
 
 public enum DynamoQueryAction {
     case set, get, delete, filter
@@ -1316,7 +1316,7 @@ public struct FluentDynamoDBProvider: Provider {
         databases.add(database: DynamoDatabase.self, as: .dynamo)
         services.register(databases)
     }
-    
+
     public func didBoot(_ container: Container) throws -> EventLoopFuture<Void> {
         return .done(on: container)
     }
