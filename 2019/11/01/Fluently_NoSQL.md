@@ -10,6 +10,8 @@ build-lists: true
 
 ^ In particular, we'll talk about integrating Vapor's Fluent ORM with AWS' DynamoDB.
 
+![50%]
+
 ---- 
 
 [.build-lists: false]
@@ -20,11 +22,10 @@ build-lists: true
 
 ###  @Yasumoto
 
-* Performance
-* Efficiency
-* Reliability
-* Scalability
-
+* Performance 🏎
+* Efficiency 💸
+* Reliability 💪
+* Scalability 📈
 
 ![100% right]
 
@@ -38,10 +39,18 @@ build-lists: true
 
 ## Agenda
 
-* Patient Road to Production
-* DynamoDB
-*   `AWSSDKSwift`
-* Fluent DynamoDB
+* 🔴 Patient Road to Production
+* 📦 DynamoDB
+* 🌴 `AWSSDKSwift`
+* 💧 Fluent DynamoDB
+
+![100% right]
+
+^ I hear so many folks ask how to get started with some Swift in their infrastructure. I'll share a little bit of my perspective to start us off.
+
+^ Then we'll start at the bottom of an application's stack, it's datastore.
+
+^ We'll slowly move up the stack, talking about an Amazon Web Services client library, then integrate it with Fluent.
 
 ---- 
 
@@ -143,6 +152,8 @@ build-lists: true
 5. **Timestamp** ⌚️ When?
 6. **Message**  ➡️ Where's the incident channel?
 
+^ We'll use the "big red button" itself as our example throughout this talk.
+
 ----
 
 
@@ -150,7 +161,11 @@ build-lists: true
 
 ![]
 
+^ We identified a problem we needed to solve, which while helpful, was not mission critical.
+
 ^ This is our first service written in Swift, leveraging the language, standard library, and the APIs of Fluent & Vapor.
+
+^ Also an opportunity to battle-test the AWSSDKSwift
 
 ^ It's running on our internal kubernetes cluster via EKS.
 
@@ -164,11 +179,13 @@ build-lists: true
 
 [.footer: Photo by Dawn Armfield on Unsplash]
 
-^ Also an opportunity to battle-test the AWSSDKSwift
+^ This is in contrast to putting new technology *directly* in the hot path of user traffic.
+
+^ Sometimes it works, but as your friendly neighborhood SRE, I **strongly** urge against it!
 
 ---- 
 
-## Picking a Datastore (at Slack)
+## 🤔 Picking a Datastore (at Slack)
 
 * MySQL
 * Something Else
@@ -176,6 +193,8 @@ build-lists: true
 ^ MySQL is the "supported" solution by our Database Reliability Engineering team, but requires maintenance, ongoing support, and an oncall rotation.
 
 ^ We wanted something as low-overhead as possible, able to be controlled by APIs and configuration, not chef and kernel reboots.
+
+^ After considering the options, I settled on...
 
 ----
 
@@ -327,6 +346,8 @@ build-lists: true
 5. ⌚️  `Timestamp`( String )
 6. ➡️  `Message` ( String )
 
+^ Bringing this back to our "Red Button", these are the types we'll use for each field.
+
 ---- 
 
 resource "aws_dynamodb_table" "emergency_stop_service_lock" {
@@ -361,8 +382,8 @@ resource "aws_dynamodb_table" "emergency_stop_service_lock" {
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message |
 | --- | --- | --- | --- | --- | --- |
-|  global  | 1 | false  | Jim | 8/25/2019, 2:04:31 AM | Error! |
-|  global  | 2 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed  |
+|  global  | 1 | true  | Jim | 8/25/2019, 2:04:31 AM | Error! |
+|  global  | 2 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed  |
 
 ^ So as an example, we can see the first value (at `Version` **1**) shows there was a problem, so the Emergency Stop was pressed.
 
@@ -372,8 +393,8 @@ resource "aws_dynamodb_table" "emergency_stop_service_lock" {
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message |
 | --- | --- | --- | --- | --- | --- |
-|  global  | 1 | false  | Jim | 8/25/2019, 2:04:31 AM | Error! |
-|  global  | 2 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed  |
+|  global  | 1 | true  | Jim | 8/25/2019, 2:04:31 AM | Error! |
+|  global  | 2 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed  |
 
 ^ When you're querying, you can **only** access this by the composite primary key.
 
@@ -879,8 +900,8 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message |
 | --- | --- | --- | --- | --- | --- |
-|  global  | 1 | false  | Jim | 8/25/2019, 2:04:31 AM | Error! |
-|  global  | 2 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed |
+|  global  | 1 | true  | Jim | 8/25/2019, 2:04:31 AM | Error! |
+|  global  | 2 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed |
 
 ^ This looks great, but... we don't actually have a way to get "latest value" without doing a full table scan!
 
@@ -892,8 +913,8 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message |
 | --- | --- | --- | --- | --- | --- |
-|  global  | 1 | false  | Jim | 8/25/2019, 2:04:31 AM | Error! |
-|  global  | 2 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed |
+|  global  | 1 | true  | Jim | 8/25/2019, 2:04:31 AM | Error! |
+|  global  | 2 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed |
 
 ^ This provides a challenge— when we think of something that we want a log, how could we represent this?
 
@@ -907,9 +928,9 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message | Current |
 | --- | --- | --- | --- | --- | --- | --- |
-|  global  | 0 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed | 2 |
-|  global  | 1 | false  | Jim | 8/25/2019, 2:04:31 AM | Error! | |
-|  global  | 2 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed | |
+|  global  | 0 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed | 2 |
+|  global  | 1 | true  | Jim | 8/25/2019, 2:04:31 AM | Error! | |
+|  global  | 2 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed | |
 
 ^ Here you notice we've added a new field, as well as a new "default" row at 0.
 
@@ -920,9 +941,9 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 
 | Service Name | Version | Is Incident Ongoing | User name | Time stamp | Message | Current |
 | --- | --- | --- | --- | --- | --- | --- |
-|  global  | 0 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed | 2 |
-|  global  | 1 | false  | Jim | 8/25/2019, 2:04:31 AM | Error! | |
-|  global  | 2 | true   | Joe | 8/27/2019, 7:13:40 PM | Fixed | |
+|  global  | 0 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed | 2 |
+|  global  | 1 | true  | Jim | 8/25/2019, 2:04:31 AM | Error! | |
+|  global  | 2 | false   | Joe | 8/27/2019, 7:13:40 PM | Fixed | |
 
 ^ When we want to make an update, we can perform a conditional `Put` on version `0` to only increment the version if the value is still `2`.
 
@@ -959,6 +980,8 @@ let keyConditionExpression = "#S = :global AND #T BETWEEN :then AND :now"
 2. 🔌 `DatabaseConnection`
 3. 😻 `Provider`
 
+![fit right]
+
 ---- 
 
 ### 📦  `Database`
@@ -973,8 +996,6 @@ public protocol Database {
 }
 
 ^ Our database manages our connection.
-
-^ It also creates the AWS SDK client to Dynamo, since it receives the configuration values.
 
 ----
 
@@ -1002,7 +1023,9 @@ public final class DynamoDatabase: Database {
         }
     }
 
-^ This is our opportunity to convert credentials & region (our configuration) into a connection.
+^ The database converts our configuration (credentials & region) into a connection.
+
+^ It also creates the AWS SDK client to Dynamo, since it receives the configuration values.
 
 ^ Our connection will ask us for a client when it's ready to spin one up.
 
@@ -1035,7 +1058,7 @@ public protocol DatabaseConnection: DatabaseConnectable, Extendable {
     func close()
 }
 
-^ The `Connection` itself is quite simple.
+^ The `DatabaseConnection` itself is quite simple.
 
 ---- 
 
@@ -1062,7 +1085,7 @@ public final class DynamoConnection: DatabaseConnection {
     }
 }
 
-^ For us, we can make sure the underlying EventLoop is closed for our DynamoDB client.
+^ For us, we create the client, and can make sure its underlying EventLoop can be closed.
 
 ----
 
@@ -1125,7 +1148,7 @@ public protocol DatabaseConnectable: Worker {
 
 ^ You'll receive a connection by asking something that conforms to `DatabaseConnectable`.
 
-^ This is typically going to be the `Request` object that you get once you receive a request.
+^ This is typically going to be the Vapor `Request` object that you get once you receive an HTTP request.
 
 ----
 
@@ -1251,7 +1274,7 @@ case .set:
 
 ^ Once we receive the response, we'll convert back to `DynamoValue` and invoke the callback.
 
-^ Fluent provides a wrapper which wraps this in a `Future` assuming callers prefer that route.
+^ Fluent provides an extension which wraps this in a `Future` assuming callers prefer that route.
 
 ----
 
@@ -1271,9 +1294,11 @@ public protocol Provider {
     func didBoot(_ container: Container) throws -> Future<Void>
 }
 
-^ `Provider`s allow third-party services to be easily integrated into a service `Container`.
+^ We need something to tie this together.
 
-^ Providers first register, and have access to a `Services` struct they can mutate. After all providers register, there's a boot phase.
+^ `Provider`s allow third-party services to be easily integrated into your Vapor app.
+
+^ During startup, you register your Providers, which have access to a `Services` struct they can mutate. After all providers register, there's a boot phase.
 
 ^ Most of your "real work" that isn't registering related services should be in `didBoot`
 
@@ -1324,7 +1349,9 @@ services.register(databases)
 
 ^ We're almost there! Let's get up to Application Code!
 
-& We wire everything up in our `configure` function.
+^ We wire everything up in our `configure` function.
+
+^ We bootstrap credentials, then create our database.
 
 ----
 
@@ -1339,6 +1366,10 @@ struct ServiceLock: Codable {
 }
 
 extension ServiceLock: Content { }
+
+^ In our app, we use `Models` to interact with our persistent data.
+
+^ Here's a very simplified version of the Red Button, the `Service Lock`.
 
 ----
 
@@ -1360,13 +1391,17 @@ public func write(on worker: Request) -> EventLoopFuture<[DynamoValue]> {
     	}
 }
 
-^ Create a key from a struct's properties
+^ It has a method to persist its values to a row in its DynamoDB table. This is a simplified version.
 
-^ Convert that to your query, then submit the request
+^ We create a key from its properties
+
+^ Convert that to our query, then submit the request
 
 ----
 
 # 🥁
+
+^ So with all of that, we can create our route to update the lock.
 
 ----
 
@@ -1375,7 +1410,7 @@ router.post { req -> Future<View> in
         return ServiceLock.read(on: req,
 							    serviceName: ServiceNames.global,
 								version: 0).flatMap { latestLock in
-            var lock = ServiceLock(serviceName: latestLock.serviceName,
+            let lock = ServiceLock(serviceName: latestLock.serviceName,
 								   version: latestLock.currentVersion! + 1,
 								   currentVersion: nil,
 								   isIncidentOngoing: update.isIncidentOngoing,
@@ -1386,6 +1421,12 @@ router.post { req -> Future<View> in
 		}
 	}
 }
+
+^ When we want to make an update, we'll look for the latest version by checking `Version 0`
+
+^ Once we have that response, we can write to a row one-higher than the current version.
+
+^ To keep this slide simple I'm not showing the transaction also updating `Version: 0`
 
 ----
 
