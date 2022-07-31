@@ -69,17 +69,6 @@ These slides are created with markdown and:
 
 ---
 
-# For the love of FOSS
-
-|         Job                | Available OS                                 |  Environment    |
-|----------------------------|----------------------------------------------|-----------------|
-| IT @ Google                | Goobuntu, OS X, Windows (with VP approval)   | Bare Metal      |
-| Apache Mesos SRE @ Twitter | OS X                                         | Bare Metal      |
-| SRE @ Slack                | macOS, self-supported ChromeOS or GNU/Linux  | AWS             |
-| Infrastructure @ Neuralink | Ubuntu-based distros, macOS, WSL for Windows | Bare Metal, AWS |
-
----
-
 # Rediscovering my roots
 
 Over the years, I'd forgotten what was so great & exciting about tinkering and trying new projects!
@@ -104,8 +93,9 @@ I'd mostly forgotten how to interact with hardware 😅
 
 * Many critical architectural decisions ahead
 * Incorrect choices can delay progress
-* "High rate corrects many ills"
 * How do we maintain velocity and experimentation?
+
+> "High rate corrects many ills"
 
 ---
 
@@ -122,7 +112,7 @@ I'd mostly forgotten how to interact with hardware 😅
 
 Infrastructure as a Service (IaaS)
 
-We need to understand how to work with both:
+We need to understand how to work with:
 
 * Hardware
 * Booting
@@ -169,9 +159,13 @@ Alternatively, just use an old laptop!
 
 # Crossover Cable
 
-In a straight-through cable, pins on one end correspond exactly to the corresponding pins on the other end (pin 1 to pin 1, pin 2 to pin 2, etc.). Using the same wiring scheme at each end yields a straight-through cable (a given color wire connects to a given number pin, the same at both ends). In this case, the terminations are identical, so only one pinout is required.
+* Straight-through cable:
+  * Pins on one end correspond exactly to the corresponding pins on the other end
+  * Only works when plugged into an appropriate device, like a switch
 
-In a crossover cable, pins do not correspond – some or all of the conductors are swapped at the terminations. For example, if pin 1 on one end goes to pin 2 on the other end, then pin 2 on one end goes to pin 1 on the other end, and the other pins remain unaffected. Such crossover cables are electrically symmetrical, meaning that they work identically regardless of which way you plug them in (if you turn the cable around, it still connects the same pins as before). Using different wiring at each end yields a crossover cable (a given color wire connects to one number pin at one end, and a different number pin at the other). 
+* Crossover cable
+  * Pins do not correspond
+  * Input from one side goes to output on the other
 
 https://en.wikipedia.org/wiki/Crossover_cable
 
@@ -179,11 +173,11 @@ https://en.wikipedia.org/wiki/Crossover_cable
 
 # Virtualization
 
-Not everyone is privileged enough to have spare hardware
+* Not everyone is privileged enough to have spare hardware
 
-Fortunately, tons of documentation to do this using tools like Gnome Boxes or `multipass`:
+* Fortunately, tons of documentation to do this using tools like Gnome Boxes or `multipass`:
 
-https://maas.io/tutorials/build-a-maas-and-lxd-environment-in-30-minutes-with-multipass-on-ubuntu
+* https://maas.io/tutorials/build-a-maas-and-lxd-environment-in-30-minutes-with-multipass-on-ubuntu
 
 ---
 
@@ -330,14 +324,90 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 
 # Subnets
 
+* Still the same as your cloud subnets
+* WiFi might be 192.168.1.0/24 (256 hosts)
+* Likely want a separate subnet (192.168.200.0/24) for isolation
+  * Especially during experimentation
+
 
 ---
 
 # Unicast vs. Broadcast Messages
 
+* Unicast:
+  * When you know the receiver
+  * Send a packet from my address (192.168.1.7) to Google (142.251.111.138)
+
+* Broadcast:
+  * Talk to _everyone_ who will listen - on your subnet
+  * 192.168.1.255 is our network's broadcast address
+  * 255.255.255.255 is the "everyone" address
+
 ---
 
-# DHCP
+# Unicast vs. Broadcast Messages
+
+* Unicast:
+  * When you know the receiver
+  * Send a packet from my address (192.168.1.7) to Google (142.251.111.138)
+
+---
+
+# Dynamic Host Configuration Protocol (DHCP)
+
+* Defined in October 1993
+* What about when you first join a network?
+* What the heck is the subnet I'm in?
+* How do I configure myself?
+
+---
+
+# DORA
+
+* Discover
+  * Client broadcasts on 255.255.255.255
+
+---
+
+# DORA
+
+* Discover
+  * Client broadcasts on 255.255.255.255
+
+* Offer
+  * If there is a DHCP server (typically your WiFi router)
+  * Reserve an IP address, respond back to that device
+
+---
+
+# DORA
+
+* Discover
+  * Client broadcasts on 255.255.255.255
+
+* Offer
+  * If there is a DHCP server (typically your WiFi router)
+  * Reserve an IP address, respond back to that device
+
+* Request
+  * Client will officially request that IP
+
+---
+
+# DORA
+
+* Discover
+  * Client broadcasts on 255.255.255.255
+
+* Offer
+  * If there is a DHCP server (typically your WiFi router)
+  * Reserve an IP address, respond back to that device
+
+* Request
+  * Client will officially request that IP
+
+* Acknowledge
+  * Server gives thumbs up; that's your address!
 
 ---
 
