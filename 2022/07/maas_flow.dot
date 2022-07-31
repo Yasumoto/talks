@@ -1,3 +1,11 @@
+// What we're building
+digraph {
+    "Task Server" -> "Kubernetes (k3s)";
+    "Kubernetes (k3s)" -> MaaS;
+    "MaaS" -> "Physical Machine";
+    "Physical Machine" -> "Home Lab";
+ }
+
 // Typical MaaS Flow
 
 digraph {

@@ -2,8 +2,6 @@
 title: Cloud Native Home Lab
 date: 2022-07-31
 author: Joe Smith
-extensions:
-  - image_ueberzug
 ---
 
 # Cloud Native Home Lab
@@ -38,6 +36,36 @@ These slides are created with markdown and:
 * Worked on the SCaLE Community Committee for a few years!
 * Helped build Google, Twitter, Slack, now Neuralink!
 * Used to be "that student" dual-booting university computer labs with Ubuntu
+
+---
+
+# What we're building today
+
+```
+┌──────────────────┐
+│   Task Server    │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│ Kubernetes (k3s) │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│       MaaS       │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│ Physical Machine │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│     Home Lab     │
+└──────────────────┘
+```
 
 ---
 
@@ -280,6 +308,19 @@ https://maas.io/tutorials/build-a-maas-and-lxd-environment-in-30-minutes-with-mu
 * Uses GUID Partition Table (GPT) for disk scheme
 * MaaS will create an EFI partition ( `/boot/efi` )
 * Typically as `sda1`, it will be 512 MB as `FAT32`
+
+---
+
+```
+❯ efibootmgr -v
+BootCurrent: 0000
+Timeout: 0 seconds
+BootOrder: 2001,0000,3000,2002,2004
+Boot0000* EFI Hard Drive (ASB3N553811503E0M-SK hynix PC711 HFS001TDE9X073N)     PciRoot(0x0)/Pci(0x2,0x4)/Pci(0x0,0x0)/NVMe(0x1,AC-E4-2E-00-25-56-94-E5)/HD(1,GPT,5adc6c19-af14-49b2-8395-2717f8281e25,0x800,0x100000)RC
+Boot2001* EFI USB Device        RC
+Boot3000* Internal Hard Disk or Solid State Disk        RC
+```
+
 
 ---
 
@@ -848,6 +889,36 @@ https://maas.io/docs/about-customising-machines#heading--templates
 # Taskserver Kubernetes
 
 * https://github.com/Yasumoto/taskserver-kubernetes
+
+---
+
+# What we've built today
+
+```
+┌──────────────────┐
+│   Task Server    │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│ Kubernetes (k3s) │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│       MaaS       │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│ Physical Machine │
+└──────────────────┘
+  │
+  ▼
+┌──────────────────┐
+│     Home Lab     │
+└──────────────────┘
+```
 
 ---
 
