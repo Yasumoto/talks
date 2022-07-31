@@ -224,7 +224,6 @@ https://maas.io/tutorials/build-a-maas-and-lxd-environment-in-30-minutes-with-mu
 │        BIOS        │ Machine Firmware hands over control
 └────────────────────┘
   │
-  │
   ▼
 ┌────────────────────┐
 │ Master Boot Record │ Knows how file systems are partitioned
@@ -239,12 +238,10 @@ https://maas.io/tutorials/build-a-maas-and-lxd-environment-in-30-minutes-with-mu
 │        BIOS        │ Machine Firmware hands over control
 └────────────────────┘
   │
-  │
   ▼
 ┌────────────────────┐
 │ Master Boot Record │ Knows how file systems are partitioned
 └────────────────────┘   on the disk
-  │
   │
   ▼
 ┌────────────────────┐
@@ -261,18 +258,15 @@ https://maas.io/tutorials/build-a-maas-and-lxd-environment-in-30-minutes-with-mu
 │        BIOS        │ Machine Firmware hands over control
 └────────────────────┘
   │
-  │
   ▼
 ┌────────────────────┐
 │ Master Boot Record │ Knows how file systems are partitioned
 └────────────────────┘   on the disk
   │
-  │
   ▼
 ┌────────────────────┐
 │ Boot Loader (GRUB) │ Code that can boot the operating system
 └────────────────────┘   (Linux, of course)
-  │
   │
   ▼
 ┌────────────────────┐
@@ -404,13 +398,11 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 ┌──────────────────────────────────────────┐
 │               Add machine                │
 └──────────────────────────────────────────┘
-  │
   │ Built-in Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
 │                Enlistment                │
 └──────────────────────────────────────────┘
-  │
   │
   ▼
 ┌──────────────────────────────────────────┐
@@ -434,12 +426,10 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 │                Enlistment                │
 └──────────────────────────────────────────┘
   │
-  │
   ▼
 ┌──────────────────────────────────────────┐
 │                   New                    │
 └──────────────────────────────────────────┘
-  │
   │ Built-in & Custom Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
@@ -463,24 +453,25 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 │                Enlistment                │
 └──────────────────────────────────────────┘
   │
-  │
   ▼
 ┌──────────────────────────────────────────┐
 │                   New                    │
 └──────────────────────────────────────────┘
-  │
   │ Built-in & Custom Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
 │                Commission                │
 └──────────────────────────────────────────┘
-  │
   │ SSH Keys, NTP, gather information
   ▼
 ┌──────────────────────────────────────────┐
 │                  Ready                   │
 └──────────────────────────────────────────┘
 ```
+
+---
+
+# MaaS Commissioning
 
 * After Commissioning, MaaS needs to make sure the machine is in status `Allocated`
 
@@ -495,31 +486,26 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 ┌──────────────────────────────────────────┐
 │               Add machine                │
 └──────────────────────────────────────────┘
-  │
   │ Built-in Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
 │                Enlistment                │
 └──────────────────────────────────────────┘
   │
-  │
   ▼
 ┌──────────────────────────────────────────┐
 │                   New                    │
 └──────────────────────────────────────────┘
-  │
   │ Built-in & Custom Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
 │                Commission                │
 └──────────────────────────────────────────┘
-  │
   │ SSH Keys, NTP, gather information
   ▼
 ┌──────────────────────────────────────────┐
 │                  Ready                   │
 └──────────────────────────────────────────┘
-  │
   │
   ▼
 ┌──────────────────────────────────────────┐
