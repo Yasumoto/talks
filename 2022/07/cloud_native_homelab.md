@@ -314,11 +314,13 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 
 # Networking
 
+How can we boot an operating system from the network?
+
 * Subnets
 * Unicast vs. Broadcast
 * DHCP
-* PXE
 * TFTP
+* PXE
 
 ---
 
@@ -338,11 +340,6 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
   * When you know the receiver
   * Send a packet from my address (192.168.1.7) to Google (142.251.111.138)
 
-* Broadcast:
-  * Talk to _everyone_ who will listen - on your subnet
-  * 192.168.1.255 is our network's broadcast address
-  * 255.255.255.255 is the "everyone" address
-
 ---
 
 # Unicast vs. Broadcast Messages
@@ -350,6 +347,11 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 * Unicast:
   * When you know the receiver
   * Send a packet from my address (192.168.1.7) to Google (142.251.111.138)
+
+* Broadcast:
+  * Talk to _everyone_ who will listen - on your subnet
+  * 192.168.1.255 is our network's broadcast address
+  * 255.255.255.255 is the "everyone" address
 
 ---
 
@@ -411,23 +413,36 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 
 ---
 
-# PXE
-
----
-
 # Trivial File Transfer Protocol (TFTP)
 
 * First defined in 1980
 * https://datatracker.ietf.org/doc/html/rfc906
+* Intentionally very simple, easy to implement in firmware
+
+* Client initiates a read or write request
+* Server sends DATA (read) or acknowledges from a unique port (WRITE)
+* Client must acknowledge receiving each DATA
 
 ---
 
-# MaaS
+# Preboot Execution Environment (PXE)
+
+* Added to UEFI Standard in 2015
+* Builds on DHCP, TFTP
+
+* Client sends a DHCPDISCOVER with special PXE options
+* Server responds with network configuration & IP address of TFTP server
+* Client fetches OS image from TFTP server
+
+---
+
+# Metal as a Service (MaaS)
 
 > Very fast server provisioning for your ~~data centre~~ home lab
 
 * For machines that can netboot, no need for carrying around a USB thumbdrive
 * A few ways to tie together a machine in MaaS, easiest to network boot while on the MaaS network
+* I think of it like a PXE server (DHCP & TFTP) wrapped in a Python API & Web UI
 
 ---
 
@@ -451,7 +466,6 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 ┌──────────────────────────────────────────┐
 │               Add machine                │
 └──────────────────────────────────────────┘
-  │
   │ Built-in Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
@@ -489,7 +503,6 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 ┌──────────────────────────────────────────┐
 │               Add machine                │
 └──────────────────────────────────────────┘
-  │
   │ Built-in Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
@@ -516,7 +529,6 @@ Boot3000* Internal Hard Disk or Solid State Disk        RC
 ┌──────────────────────────────────────────┐
 │               Add machine                │
 └──────────────────────────────────────────┘
-  │
   │ Built-in Commissioning Scripts
   ▼
 ┌──────────────────────────────────────────┐
@@ -885,6 +897,14 @@ https://maas.io/docs/about-customising-machines#heading--templates
 
 ---
 
+# Configuring our OS & Platform
+
+* We can install Linux!
+* How do we configure a basic Ubuntu install?
+  * `Cloud-init`!
+
+---
+
 # Cloud-init
 
 * Setup the machine immediately on first boot
@@ -894,10 +914,23 @@ https://maas.io/docs/about-customising-machines#heading--templates
 
 ---
 
-# Configuring our OS & Platform
+# `cloud-config.yml`
 
-* How do we configure a basic Ubuntu install?
-  * `Cloud-init`!
+~~~yaml
+package_update: true
+package_upgrade: true
+users:
+  - name: joe
+    gecos: Joe Smith
+    groups: joe
+    ssh_import_id:
+      - gh:Yasumoto
+~~~
+
+---
+
+# Speeding Up
+
 * Even with all this, re-provisioning a whole server is too slow for a deployment
 
 > All Problems in Computer Science Can Be Solved by Another Layer of Indirection
@@ -908,16 +941,18 @@ https://maas.io/docs/about-customising-machines#heading--templates
 
 ---
 
-# Keeping tabs on our lab
+# Cloud Init `runcmd`
 
-* I'm too spoiled by pretty graphs
-  * Node Exporter
-  * Prometheus
-  * Grafana
+k3s has very simple installation:
+
+~~~yaml
+runcmd:
+ - [ sh, -c, "curl -sfL https://get.k3s.io | sh -" ]
+~~~
 
 ---
 
-# Hey, this is quite robust
+# Hey, that was easy
 
 * What can I run that will matter?
 * Omnifocus is still great, but proprietary!
@@ -942,9 +977,70 @@ https://maas.io/docs/about-customising-machines#heading--templates
 
 ---
 
+# Taskserver Docker
+
+~~~Dockerfile
+RUN git clone --depth 1 --branch ${VERSION} https://github.com/GothenburgBitFactory/taskserver
+
+RUN cmake -DCMAKE_BUILD_TYPE=release .
+RUN bash -c "nice -n 20 make -j$(nproc)"
+
+EXPOSE 64738/tcp 64738/udp 50051
+
+ENTRYPOINT ["/usr/bin/taskd"]
+CMD ["server", "--data", "/home/taskserver/.taskserver"]
+~~~
+
+---
+
+# Taskserver TLS Certificates
+
+~~~sh
+cd ~/workspace/github.com/GothenburgBitFactory/taskserver/pki
+sed 's%generate.client client%generate.client my_awesome_taskserver% pki/generate
+# then update pki/vars
+./generate
+~~~
+
+---
+
 # Taskserver Kubernetes
 
 * https://github.com/Yasumoto/taskserver-kubernetes
+
+---
+
+# Taskserver Kubernetes
+
+~~~sh
+#!/bin/sh
+
+set -eux
+
+export KUBE_NAMESPACE=taskserver
+
+kubectl apply -f 00-taskserver-namespace.yaml
+kubectl apply -f 05-taskserver-pvc.yaml
+
+kubectl delete configmap taskserver-config || true
+kubectl create configmap taskserver-config --from-file=config
+
+
+kubectl apply -f 10-taskserver-deployment.yaml
+kubectl apply -f 20-taskserver-svc.yaml
+
+
+cd ./ssl
+
+if [ ! -f ./ca.key.pem ]; then
+  echo "Please read ./ssl/README.md to generate the certs if needed."
+  echo "Then copy them from the taskserver repo into ./ssl"
+  exit 1
+fi
+
+kubectl delete secret --namespace taskserver taskserver-ssl || true
+kubectl --namespace taskserver create secret generic taskserver-ssl --from-file=<certificates>
+~~~
 
 ---
 
@@ -982,3 +1078,5 @@ https://maas.io/docs/about-customising-machines#heading--templates
 
 * https://selfhosted.show
 * https://100daysofhomelab.com/
+
+🧠 https://neuralink.com/careers 🎉
