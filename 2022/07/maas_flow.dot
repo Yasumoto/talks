@@ -1,0 +1,22 @@
+// Typical MaaS Flow
+
+digraph {
+    "Add machine" -> Enlistment [label="Built-in Commissioning Scripts"];
+    Enlistment -> New;
+    New -> Commission [label="Built-in & Custom Commissioning Scripts"];
+    Commission -> Ready [label="SSH Keys, NTP, gather information"];
+    Ready -> Deploy;
+}
+
+
+// Machine Commissioning
+
+digraph {
+    "target machine" -> rackd [label="1. dhcp"];
+    rackd -> regiond [label="2. fetch boot metadata\nKernel, boot args, initrd/squashfs"];
+    rackd -> "target machine" [label="3. PXE Config"];
+    "target machine" -> "target machine" [label="4. Boot Ubuntu from PXE"];
+    "target machine" -> rackd [label="5. Fetch cloud-init\nfrom regiond"];
+    "target machine" -> rackd [label="6. Publish metadata\nup to regiond"];
+    regiond -> postgresql [label="7. Persist machine details"];
+}
